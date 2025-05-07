@@ -1,5 +1,7 @@
-import cv2
+import pyrealsense2 as rs
 import numpy as np
+import cv2
+
 
 #* Import the reusable functions
 def create_hsv_trackbar(window_name="HSV Trackbars"):
@@ -26,16 +28,27 @@ create_hsv_trackbar("Green HSV")
 create_hsv_trackbar("Yellow YUV")
 create_hsv_trackbar("Red YUV")
 
-#* read frame from video capture device
-cap = cv2.VideoCapture(2)
+
+pipeline = rs.pipeline()
+config = rs.config()
+
+config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
+pipeline.start(config)
 
 while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
+    frames = pipeline.wait_for_frames()
+    depth_frame = frames.get_depth_frame()
+    color_frame = frames.get_color_frame()
+    if not depth_frame or not color_frame:
+        continue
+
+    depth_image = np.asanyarray(depth_frame.get_data())
+    color_image = np.asanyarray(color_frame.get_data())
 
     #* gausian blur
-    blurFrame = cv2.GaussianBlur(frame,(5,5),0)
+    blurFrame = cv2.GaussianBlur(color_image,(5,5),0)
 
     #* get trackbar value
     greenLower, greenUpper = get_hsv_values("Green HSV")
@@ -63,32 +76,41 @@ while True:
 
     if greenMaxControur is not None:
         [x, y, w, h] = cv2.boundingRect(greenMaxControur)
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 255), 2)
+        cv2.rectangle(color_image, (x, y), (x + w, y + h), (255, 255, 255), 2)
 
         center_x = (x + (x + w)) // 2
         center_y = (y + (y + h)) // 2
 
-        cv2.line(frame, (335,255),(center_x, center_y), (255,255,255), 2)
-
+        depthGreen = depth_frame.get_distance(center_x, center_y)
+        cv2.line(color_image, (335,255),(center_x, center_y), (255,255,255), 2)
+        cv2.putText(color_image, f"Depth: {depthGreen:.2f} m", (x, y - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+        
     if yellowMaxContour is not None:
         [x, y, w, h] = cv2.boundingRect(yellowMaxContour)
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 2)
+        cv2.rectangle(color_image, (x, y), (x + w, y + h), (0, 255, 255), 2)
 
         center_x = (x + (x + w)) // 2
         center_y = (y + (y + h)) // 2
 
-        cv2.line(frame, (335,255),(center_x, center_y), (0,255,255), 2)
+        depthYellow = depth_frame.get_distance(center_x, center_y)
+        cv2.line(color_image, (335,255),(center_x, center_y), (0,255,255), 2)
+        cv2.putText(color_image, f"Depth: {depthYellow:.2f} m", (x, y - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
     if redMaxContour is not None:
         [x, y, w, h] = cv2.boundingRect(redMaxContour)
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        cv2.rectangle(color_image, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
         center_x = (x + (x + w)) // 2
         center_y = (y + (y + h)) // 2
 
-        cv2.line(frame, (335,255),(center_x, center_y), (0,0,255), 2)
+        depthRed = depth_frame.get_distance(center_x, center_y)
+        cv2.line(color_image, (335,255),(center_x, center_y), (0,0,255), 2)
+        cv2.putText(color_image, f"Depth: {depthRed:.2f} m", (x, y - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
-    cv2.imshow("Original", frame)
+    cv2.imshow("Original", color_image)
     cv2.imshow("Green Mask", greenMask)
     cv2.imshow("Yellow Mask", yellowMask)
     cv2.imshow("Red Mask", redMask)
@@ -96,6 +118,5 @@ while True:
     if cv2.waitKey(1) & 0xFF == 27:
         break
 
-cap.release()
+pipeline.stop()
 cv2.destroyAllWindows()
-
