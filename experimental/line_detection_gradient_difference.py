@@ -38,7 +38,7 @@ def region_of_intrest(image,):
     return masked_image,points
 
 # Reading Videos
-capture = cv.VideoCapture("/home/juhdi/catkin_ws/src/amartya-autonomousrccar/jetson/data/road.mp4")
+capture = cv.VideoCapture("resources/road.mp4")
 _, frame = capture.read()
 
 # Create window and trackbars

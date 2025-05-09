@@ -8,7 +8,7 @@ def nothing(x):
 
 cv2.namedWindow("hsv")
 
-video = cv2.VideoCapture("/home/juhdi/catkin_ws/src/amartya-autonomousrccar/Juhdi/src/road.mp4")
+video = cv2.VideoCapture("resources/road.mp4")
 cv2.createTrackbar("hue_min", "hsv", 0, 179, nothing)
 cv2.createTrackbar("sat_min", "hsv", 0, 255, nothing)
 cv2.createTrackbar("val_min", "hsv", 0, 255, nothing)
@@ -20,7 +20,7 @@ cv2.createTrackbar("Min Area", "hsv", 500, 10000, nothing)
 while True:
     ret, orig_frame = video.read()
     if not ret:
-        video = cv2.VideoCapture("/home/juhdi/catkin_ws/src/my_robot_controller/scripts/road.mp4")
+        video = cv2.VideoCapture("resources/road.mp4")
         continue
 
     frame = cv2.GaussianBlur(orig_frame, (5, 5), 0)
