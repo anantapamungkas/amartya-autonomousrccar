@@ -161,7 +161,7 @@ while success:
     cv2.addWeighted(overlay, alpha, transformed_frame, 1 - alpha, 0, transformed_frame)
 
     # Display the transformed frame with the highlighted lane
-    cv2.imshow("Transformed Frame with Highlighted Lane", overlay)
+    # cv2.imshow("Transformed Frame with Highlighted Lane", overlay)
 
     # Inverse perspective transformation to map the lanes back to the original image
     inv_matrix = cv2.getPerspectiveTransform(pts2, pts1)
@@ -180,7 +180,7 @@ while success:
 
     cv2.imshow("Original", frame)
     cv2.imshow("Bird's Eye View", transformed_frame)
-    cv2.imshow("Lane Detection - Image Thresholding", mask)
+    # cv2.imshow("Lane Detection - Image Thresholding", mask)
     cv2.imshow("Lane Detection - Sliding Windows", msk)
     cv2.imshow('Lane Detection', result)
 
