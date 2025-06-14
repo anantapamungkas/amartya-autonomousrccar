@@ -70,8 +70,6 @@ while True:
             x1, y1, x2, y2 = line[0]
             cv.line(frame, (x1, y1), (x2, y2), (0, 255, 0), 5)
 
-
-
     # Display results
     cv.imshow("Original with Lines", frame)
     cv.imshow('Edge Detection', crop_image)
