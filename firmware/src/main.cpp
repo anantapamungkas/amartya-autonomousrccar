@@ -12,22 +12,22 @@
 #define INR 0
 #define INL 2
 #define FreqM 100000
-#define ServoPin 12
+#define ServoPin 3
 #define ButtonAPin 24
 #define ButtonBPin 25
 #define ButtonCPin 26
-#define X_ENC1 20
-#define X_ENC2 21
+#define X_ENC1 3
+#define X_ENC2 4
 
-int motorSpeed, servoSteering;
+int motorSpeed = 0, servoSteering;
 int posA;
-bool ButtonAState,ButtonBState,ButtonCState;
+int ButtonAState,ButtonBState,ButtonCState;
 
 RotaryEncoder *encoderA = nullptr;
 RotaryEncoder *encoderB = nullptr;
 Motor motor(INR,INL,FreqM);
 Servo servo;
-IMU IMU;
+IMU imu;
 
 void msgSpeed(const std_msgs::Int32 &msg) {
   motorSpeed = msg.data;
@@ -41,7 +41,9 @@ void checkPositionA() {
 
 
 void display(){
-  Serial.print(motorSpeed);
+  Serial.print(ButtonAState);
+  Serial.print(" : ");
+  Serial.print(ButtonBState);
   Serial.print(" : ");
   Serial.println(servoSteering);
 }
@@ -50,9 +52,9 @@ void sensor(){
   encoderA->tick();
   posA = encoderA->getPosition();
 
-  ButtonAState = digitalRead(ButtonAPin);
-  ButtonBState = digitalRead(ButtonBPin);
-  ButtonCState = digitalRead(ButtonCPin);
+  ButtonAState = analogRead(ButtonAPin);
+  ButtonBState = analogRead(ButtonBPin);
+  ButtonCState = analogRead(ButtonCPin);
 }
 
 void aktuator(){
@@ -69,9 +71,13 @@ void communicaton(){
 
 void setup() {
   Serial.begin(115200);
-  IMU.begin();
-  servo.write(90);
+  imu.begin();
   servo.attach(ServoPin);
+  pinMode(ButtonAState, INPUT);
+  pinMode(ButtonBState, INPUT);
+  pinMode(ButtonCState, INPUT);
+  servo.write(180);
+  
 
   encoderA = new RotaryEncoder(X_ENC1, X_ENC2, RotaryEncoder::LatchMode::TWO03);
 
@@ -80,12 +86,19 @@ void setup() {
 }
 
 void loop() {
-  communicaton();
+  // communicaton();
   display();
   sensor();
-  aktuator();
-  if (ButtonAState == HIGH){
-    posA = 0;
+  // aktuator();
+
+  if (ButtonAState == 1023){
+    servoSteering += 5;
     delay(50);
   }
+
+  if (ButtonBState == 1023){
+    servoSteering -= 5;
+    delay(50);
+  }
+  servo.write(servoSteering); 
 }
