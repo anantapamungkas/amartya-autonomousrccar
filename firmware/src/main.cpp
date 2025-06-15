@@ -11,15 +11,15 @@
 //Declaration
 #define INR 0
 #define INL 2
-#define FreqM 100000
-#define ServoPin 3
+#define FreqM 10000
+#define ServoPin 12
 #define ButtonAPin 24
 #define ButtonBPin 25
 #define ButtonCPin 26
-#define X_ENC1 3
+#define X_ENC1 6
 #define X_ENC2 4
 
-int motorSpeed = 0, servoSteering;
+int motorSpeed = 0, servoSteering=90;
 int posA;
 int ButtonAState,ButtonBState,ButtonCState;
 
@@ -76,7 +76,7 @@ void setup() {
   pinMode(ButtonAState, INPUT);
   pinMode(ButtonBState, INPUT);
   pinMode(ButtonCState, INPUT);
-  servo.write(180);
+  servo.write(90);
   
 
   encoderA = new RotaryEncoder(X_ENC1, X_ENC2, RotaryEncoder::LatchMode::TWO03);
@@ -100,5 +100,7 @@ void loop() {
     servoSteering -= 5;
     delay(50);
   }
+  servoSteering = constrain(servoSteering,60,120);
   servo.write(servoSteering); 
+  motor.setSpeed(20);
 }
