@@ -11,7 +11,7 @@ private:
     int readRawAngle();
 
 public:
-    IMU(int i2cAddress = 0x60);
+    IMU(int i2cAddress = 0x61);
 
     void begin();
     int getHeading();       // Get heading CW

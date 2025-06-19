@@ -7,6 +7,7 @@
 #include <std_msgs/Char.h>
 #include <std_msgs/Int32.h>
 #include <RotaryEncoder.h>
+#include <geometry_msgs/Twist.h>
 
 //Declaration
 #define INR 0
@@ -16,29 +17,38 @@
 #define ButtonAPin 24
 #define ButtonBPin 25
 #define ButtonCPin 26
-#define X_ENC1 6
+#define X_ENC1 3
 #define X_ENC2 4
 
 int motorSpeed = 0, servoSteering=90;
 int posA;
 int ButtonAState,ButtonBState,ButtonCState;
+int heading;
 
 RotaryEncoder *encoderA = nullptr;
-RotaryEncoder *encoderB = nullptr;
 Motor motor(INR,INL,FreqM);
 Servo servo;
 IMU imu;
 
-void msgSpeed(const std_msgs::Int32 &msg) {
-  motorSpeed = msg.data;
+ros::NodeHandle nh;
+
+void velCallback(  const geometry_msgs::Twist& vel){
+  motorSpeed = vel.linear.x ;
+  servoSteering = vel.angular.x ;
 }
-void msgSteering(const std_msgs::Int32 &msg) {
-  servoSteering = msg.data;
-}
+
+// void msgSpeed(const std_msgs::Int32 &msg) {
+//   motorSpeed = msg.data;
+// }
+// void msgSteering(const std_msgs::Int32 &msg) {
+//   servoSteering = msg.data;
+// }
+
+ros::Subscriber<geometry_msgs::Twist> sub("cmd_vel" , velCallback);
+
 void checkPositionA() {
   encoderA->tick();
 }
-
 
 void display(){
   Serial.print(ButtonAState);
@@ -55,6 +65,8 @@ void sensor(){
   ButtonAState = analogRead(ButtonAPin);
   ButtonBState = analogRead(ButtonBPin);
   ButtonCState = analogRead(ButtonCPin);
+
+  heading = imu.getHeading();
 }
 
 void aktuator(){
@@ -73,6 +85,10 @@ void setup() {
   Serial.begin(115200);
   imu.begin();
   servo.attach(ServoPin);
+
+  nh.initNode();
+  nh.subscribe(sub);
+
   pinMode(ButtonAState, INPUT);
   pinMode(ButtonBState, INPUT);
   pinMode(ButtonCState, INPUT);
@@ -87,7 +103,7 @@ void setup() {
 
 void loop() {
   // communicaton();
-  display();
+  // display();
   sensor();
   // aktuator();
 
@@ -100,7 +116,11 @@ void loop() {
     servoSteering -= 5;
     delay(50);
   }
+
+  Serial.println(posA);
   servoSteering = constrain(servoSteering,60,120);
-  servo.write(servoSteering); 
-  motor.setSpeed(20);
+  // servo.write(servoSteering); 
+  //motor.setSpeed(20);//15 ws banter //Servo e sudut tengah e 90, mentok kiri 60 deraat, mentok kanan 120 derajat. jangan melebihi rntang 
+
+  nh.spinOnce();
 }
