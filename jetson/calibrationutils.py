@@ -1,5 +1,6 @@
 import pyrealsense2 as rs
 import numpy as np
+import math
 import cv2
 
 
@@ -35,7 +36,24 @@ config = rs.config()
 config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
+color_profile = pipeline.get_active_profile().get_stream(rs.stream.color)
+intrinsics = color_profile.as_video_stream_profile().get_intrinsics()
+
 pipeline.start(config)
+
+fourcc = cv2.VideoWriter_fourcc(*'XVID')  # You can use 'MJPG', 'XVID', 'MP4V', etc.
+out = cv2.VideoWriter('output.avi', fourcc, 30.0, (640, 480))  # filenam
+
+def get_angle_from_center(x, y, depth, intrinsics):
+    # Convert 2D pixel + depth to 3D point
+    point_3d = rs.rs2_deproject_pixel_to_point(intrinsics, [x, y], depth)
+    # point_3d = [X, Y, Z] in meters
+
+    # Angle from camera center to object in horizontal (X-Z) plane
+    angle_rad = math.atan2(point_3d[0], point_3d[2])  # X/Z
+    angle_deg = math.degrees(angle_rad)
+
+    return angle_deg
 
 while True:
     frames = pipeline.wait_for_frames()
@@ -109,6 +127,8 @@ while True:
         cv2.line(color_image, (335,255),(center_x, center_y), (0,0,255), 2)
         cv2.putText(color_image, f"Depth: {depthRed:.2f} m", (x, y - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+        
+    out.write(color_frame)
 
     cv2.imshow("Original", color_image)
     cv2.imshow("Green Mask", greenMask)

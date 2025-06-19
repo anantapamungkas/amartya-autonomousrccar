@@ -74,41 +74,41 @@ while True:
     redContour, _ = cv2.findContours(redMask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     redMaxContour = max(redContour, key=cv2.contourArea, default=None)
 
-    if greenMaxControur is not None:
-        [x, y, w, h] = cv2.boundingRect(greenMaxControur)
-        cv2.rectangle(color_image, (x, y), (x + w, y + h), (255, 255, 255), 2)
+    # if greenMaxControur is not None:
+    #     [x, y, w, h] = cv2.boundingRect(greenMaxControur)
+    #     cv2.rectangle(color_image, (x, y), (x + w, y + h), (255, 255, 255), 2)
 
-        center_x = (x + (x + w)) // 2
-        center_y = (y + (y + h)) // 2
+    #     center_x = (x + (x + w)) // 2
+    #     center_y = (y + (y + h)) // 2
 
-        depthGreen = depth_frame.get_distance(center_x, center_y)
-        cv2.line(color_image, (335,255),(center_x, center_y), (255,255,255), 2)
-        cv2.putText(color_image, f"Depth: {depthGreen:.2f} m", (x, y - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+    #     depthGreen = depth_frame.get_distance(center_x, center_y)
+    #     cv2.line(color_image, (335,255),(center_x, center_y), (255,255,255), 2)
+    #     cv2.putText(color_image, f"Depth: {depthGreen:.2f} m", (x, y - 10),
+    #                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
         
-    if yellowMaxContour is not None:
-        [x, y, w, h] = cv2.boundingRect(yellowMaxContour)
-        cv2.rectangle(color_image, (x, y), (x + w, y + h), (0, 255, 255), 2)
+    # if yellowMaxContour is not None:
+    #     [x, y, w, h] = cv2.boundingRect(yellowMaxContour)
+    #     cv2.rectangle(color_image, (x, y), (x + w, y + h), (0, 255, 255), 2)
 
-        center_x = (x + (x + w)) // 2
-        center_y = (y + (y + h)) // 2
+    #     center_x = (x + (x + w)) // 2
+    #     center_y = (y + (y + h)) // 2
 
-        depthYellow = depth_frame.get_distance(center_x, center_y)
-        cv2.line(color_image, (335,255),(center_x, center_y), (0,255,255), 2)
-        cv2.putText(color_image, f"Depth: {depthYellow:.2f} m", (x, y - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+    #     depthYellow = depth_frame.get_distance(center_x, center_y)
+    #     cv2.line(color_image, (335,255),(center_x, center_y), (0,255,255), 2)
+    #     cv2.putText(color_image, f"Depth: {depthYellow:.2f} m", (x, y - 10),
+    #                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
-    if redMaxContour is not None:
-        [x, y, w, h] = cv2.boundingRect(redMaxContour)
-        cv2.rectangle(color_image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+    # if redMaxContour is not None:
+    #     [x, y, w, h] = cv2.boundingRect(redMaxContour)
+    #     cv2.rectangle(color_image, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
-        center_x = (x + (x + w)) // 2
-        center_y = (y + (y + h)) // 2
+    #     center_x = (x + (x + w)) // 2
+    #     center_y = (y + (y + h)) // 2
 
-        depthRed = depth_frame.get_distance(center_x, center_y)
-        cv2.line(color_image, (335,255),(center_x, center_y), (0,0,255), 2)
-        cv2.putText(color_image, f"Depth: {depthRed:.2f} m", (x, y - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+    #     depthRed = depth_frame.get_distance(center_x, center_y)
+    #     cv2.line(color_image, (335,255),(center_x, center_y), (0,0,255), 2)
+    #     cv2.putText(color_image, f"Depth: {depthRed:.2f} m", (x, y - 10),
+    #                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
     cv2.imshow("Original", color_image)
     cv2.imshow("Green Mask", greenMask)

@@ -1,18 +1,26 @@
 #include <Arduino.h>
+#include "Motor.h"
+#include "IMU.h"
 
-// put function declarations here:
-int myFunction(int, int);
+#define PIN_BTN1 0
+#define PIN_BTN2 0
+#define PIN_BTN3 0
+
+Motor motor(0, 2, 400);
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(9600);
+
+  pinMode(PIN_BTN1, INPUT);
+  pinMode(PIN_BTN2, INPUT);
+  pinMode(PIN_BTN3, INPUT);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  
 }
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+int readButton(int pin) {
+  int output = digitalRead(pin);
+  return output;
 }
