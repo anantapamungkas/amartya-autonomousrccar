@@ -106,13 +106,20 @@ try:
 
         # Obstacle masks
         blurFrame = cv2.GaussianBlur(color_image, (5, 5), 0)
-        greenLower, greenUpper = get_hsv_values("Green HSV")
-        yellowLower, yellowUpper = get_hsv_values("Yellow HSV")
-        redLower, redUpper = get_hsv_values("Red HSV")
+        # greenLower, greenUpper = get_hsv_values("Green HSV")
+        # yellowLower, yellowUpper = get_hsv_values("Yellow HSV")
+        # redLower, redUpper = get_hsv_values("Red HSV")
+
+        greenLower = (0, 0, 0)
+        greenUpper = (0, 0, 0)
+        yellowLower = (0, 0, 0)
+        yellowUpper = (0, 0, 0)
+        redLower = (0, 0, 0)
+        redUpper = (0, 0, 0)
 
         greenMask = cv2.inRange(cv2.cvtColor(blurFrame, cv2.COLOR_BGR2HSV), greenLower, greenUpper)
-        yellowMask = cv2.inRange(cv2.cvtColor(blurFrame, cv2.COLOR_BGR2HSV), yellowLower, yellowUpper)
-        redMask = cv2.inRange(cv2.cvtColor(blurFrame, cv2.COLOR_BGR2HSV), redLower, redUpper)
+        yellowMask = cv2.inRange(cv2.cvtColor(blurFrame, cv2.COLOR_BGR2YUV), yellowLower, yellowUpper)
+        redMask = cv2.inRange(cv2.cvtColor(blurFrame, cv2.COLOR_BGR2YUV), redLower, redUpper)
 
         # Obstacle depth + direction
         def influence_by_obstacle(cx, depth, frame_center_x):
