@@ -103,16 +103,6 @@ void loop() {
   sensor();
   // aktuator();
 
-  // if (ButtonAState == 1023){
-  //   servoSteering += 5;
-  //   delay(50);
-  // }
-
-  // if (ButtonBState == 1023){
-  //   servoSteering -= 5;
-  //   delay(50);
-  // }
-
   servoSteering = constrain(servoSteering,60,120);
   servo.write(heading); 
 
@@ -120,12 +110,6 @@ void loop() {
   str_msg.data = buffer;
   chatter.publish( &str_msg );
 
-  Serial.print("motorSpeed ");
-  Serial.print(motorSpeed);
-  Serial.print(" : ");
-  Serial.print("servoSteering ");
-  Serial.print(servoSteering);
-  Serial.println();
   //motor.setSpeed(20);//15 ws banter //Servo e sudut tengah e 90, mentok kiri 60 deraat, mentok kanan 120 derajat. jangan melebihi rntang 
 
   nh.spinOnce();
