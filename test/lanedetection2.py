@@ -1,5 +1,3 @@
-
-
 import pyrealsense2 as rs
 import numpy as np
 import cv2
@@ -25,7 +23,6 @@ config = rs.config()
 config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 pipeline.start(config)
-
 
 while True:
     frames = pipeline.wait_for_frames()
@@ -109,36 +106,48 @@ while True:
     prevRx = rx
 
     min_length = min(len(lx), len(rx))
-    if min_length < 2:
-        continue
+    left_points = [(lx[i], 480 - i * window_height) for i in range(len(lx))]
+    right_points = [(rx[i], 480 - i * window_height) for i in range(len(rx))]
 
-    left_points = [(lx[i], 480 - i * window_height) for i in range(min_length)]
-    right_points = [(rx[i], 480 - i * window_height) for i in range(min_length)]
+    steering_angle = 0
+    curvature = 0
+    lane_offset = 0
 
-    left_fit = np.polyfit([p[1] for p in left_points], [p[0] for p in left_points], 2)
-    right_fit = np.polyfit([p[1] for p in right_points], [p[0] for p in right_points], 2)
+    if len(lx) > 0 and len(rx) > 0:
+        min_length = min(len(lx), len(rx))
+        left_points = [(lx[i], 480 - i * window_height) for i in range(min_length)]
+        right_points = [(rx[i], 480 - i * window_height) for i in range(min_length)]
 
-    y_eval = 480
-    left_curvature = ((1 + (2*left_fit[0]*y_eval + left_fit[1])**2)**1.5) / np.abs(2*left_fit[0])
-    right_curvature = ((1 + (2*right_fit[0]*y_eval + right_fit[1])**2)**1.5) / np.abs(2*right_fit[0])
-    curvature = (left_curvature + right_curvature) / 2
+        left_fit = np.polyfit([p[1] for p in left_points], [p[0] for p in left_points], 2)
+        right_fit = np.polyfit([p[1] for p in right_points], [p[0] for p in right_points], 2)
 
-    lane_center = (lx[0] + rx[0]) / 2
-    car_position = 320
-    lane_offset = (car_position - lane_center) * 3.7 / 640
-    steering_angle = np.arctan(lane_offset / curvature) * 180 / np.pi
+        y_eval = 480
+        left_curvature = ((1 + (2*left_fit[0]*y_eval + left_fit[1])**2)**1.5) / np.abs(2*left_fit[0])
+        right_curvature = ((1 + (2*right_fit[0]*y_eval + right_fit[1])**2)**1.5) / np.abs(2*right_fit[0])
+        curvature = (left_curvature + right_curvature) / 2
 
-    # Lane polygon
-    top_left = (lx[0], 480)
-    bottom_left = (lx[min_length-1], 0)
-    top_right = (rx[0], 480)
-    bottom_right = (rx[min_length-1], 0)
-    quad_points = np.array([top_left, bottom_left, bottom_right, top_right], np.int32).reshape((-1, 1, 2))
+        lane_center = (lx[0] + rx[0]) / 2
+        car_position = 320
+        lane_offset = (car_position - lane_center) * 3.7 / 640
+        steering_angle = np.arctan(lane_offset / curvature) * 180 / np.pi
+    elif len(lx) > 0 and len(rx) == 0:
+        steering_angle = 45.0  # Turn right
+    elif len(rx) > 0 and len(lx) == 0:
+        steering_angle = -45.0  # Turn left
+    else:
+        steering_angle = 0
 
-    overlay = transformed_frame.copy()
-    cv2.fillPoly(overlay, [quad_points], (0, 255, 0))
-    alpha = 0.2
-    cv2.addWeighted(overlay, alpha, transformed_frame, 1 - alpha, 0, transformed_frame)
+    if len(lx) > 0 and len(rx) > 0:
+        top_left = (lx[0], 480)
+        bottom_left = (lx[min_length-1], 0)
+        top_right = (rx[0], 480)
+        bottom_right = (rx[min_length-1], 0)
+        quad_points = np.array([top_left, bottom_left, bottom_right, top_right], np.int32).reshape((-1, 1, 2))
+
+        overlay = transformed_frame.copy()
+        cv2.fillPoly(overlay, [quad_points], (0, 255, 0))
+        alpha = 0.2
+        cv2.addWeighted(overlay, alpha, transformed_frame, 1 - alpha, 0, transformed_frame)
 
     inv_matrix = cv2.getPerspectiveTransform(pts2, pts1)
     perspective_back = cv2.warpPerspective(transformed_frame, inv_matrix, (640, 480))
@@ -151,6 +160,9 @@ while True:
     cv2.putText(result, f'Curvature: {curvature:.2f} m', (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
     cv2.putText(result, f'Offset: {lane_offset:.2f} m', (30, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
     cv2.putText(result, f'Angle: {steering_angle:.2f} deg', (30, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+
+    if len(lx) == 0 or len(rx) == 0:
+        cv2.putText(result, 'Partial Lane Detected', (30, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
     # Show windows
     cv2.imshow("Original", frame)

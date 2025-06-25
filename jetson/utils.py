@@ -51,7 +51,7 @@ def select_rgb_white_yellow(image):
     masked = cv2.bitwise_and(image, image, mask = mask)
     return masked
 
-def sliding_window_steering_angle(binary_warped, num_windows=6, margin=60, minpix=40, visualize=True):
+def sliding_window_steering_angle(binary_warped, num_windows=12, margin=50, minpix=60, visualize=True):
     out_img = np.dstack((binary_warped, binary_warped, binary_warped)) * 255
 
     # Step 1: Base detection from histogram
@@ -175,3 +175,41 @@ def get_hsv_values(window_name="HSV Trackbars"):
     s_max = cv2.getTrackbarPos("S Max", window_name)
     v_max = cv2.getTrackbarPos("V Max", window_name)
     return (h_min, s_min, v_min), (h_max, s_max, v_max)
+
+def create_roi_trackbar(window_name="ROI Points"):
+    def nothing(x): pass
+    cv2.namedWindow(window_name)
+
+    # Top Left
+    cv2.createTrackbar("TL X", window_name, 0, 640, nothing)
+    cv2.createTrackbar("TL Y", window_name, 0, 480, nothing)
+
+    # Top Right
+    cv2.createTrackbar("TR X", window_name, 640, 640, nothing)
+    cv2.createTrackbar("TR Y", window_name, 0, 480, nothing)
+
+    # Bottom Left
+    cv2.createTrackbar("BL X", window_name, 0, 640, nothing)
+    cv2.createTrackbar("BL Y", window_name, 480, 480, nothing)
+
+    # Bottom Right
+    cv2.createTrackbar("BR X", window_name, 640, 640, nothing)
+    cv2.createTrackbar("BR Y", window_name, 480, 480, nothing)
+
+
+def get_roi_points(window_name="ROI Points"):
+    tl_x = cv2.getTrackbarPos("TL X", window_name)
+    tl_y = cv2.getTrackbarPos("TL Y", window_name)
+    tr_x = cv2.getTrackbarPos("TR X", window_name)
+    tr_y = cv2.getTrackbarPos("TR Y", window_name)
+    bl_x = cv2.getTrackbarPos("BL X", window_name)
+    bl_y = cv2.getTrackbarPos("BL Y", window_name)
+    br_x = cv2.getTrackbarPos("BR X", window_name)
+    br_y = cv2.getTrackbarPos("BR Y", window_name)
+
+    tl = [tl_x, tl_y]
+    tr = [tr_x, tr_y]
+    bl = [bl_x, bl_y]
+    br = [br_x, br_y]
+
+    return tl, tr, bl, br
