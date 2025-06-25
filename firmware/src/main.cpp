@@ -20,7 +20,7 @@
 #define X_ENC1 5
 #define X_ENC2 6
 
-int motorSpeed = 0, servoSteering=90;
+int motorSpeed = 0, servoSteering=90, angleObject,distanceObject;
 int posA;
 int ButtonAState,ButtonBState,ButtonCState;
 int heading;
@@ -35,6 +35,8 @@ ros::NodeHandle nh;
 
 void velCallback(  const geometry_msgs::Twist& vel){
   motorSpeed = vel.linear.x ;
+  distanceObject = vel.angular.x ;
+  angleObject = vel.angular.y ;
   servoSteering = vel.angular.z ;
 }
 
@@ -52,6 +54,13 @@ void display(){
   Serial.print(ButtonBState);
   Serial.print(" : ");
   Serial.println(servoSteering);
+
+    // Serial.print("motorSpeed ");
+  // Serial.print(motorSpeed);
+  // Serial.print(" : ");
+  // Serial.print("servoSteering ");
+  // Serial.print(servoSteering);
+  // Serial.println();
 }
 
 void sensor(){
@@ -104,12 +113,11 @@ void loop() {
   // aktuator();
 
   servoSteering = constrain(servoSteering,60,120);
-  servo.write(heading); 
+  servo.write(servoSteering); 
 
   sprintf(buffer, "motorSpeed: %d, servoSteering: %d", motorSpeed, servoSteering);
   str_msg.data = buffer;
   chatter.publish( &str_msg );
-
   //motor.setSpeed(20);//15 ws banter //Servo e sudut tengah e 90, mentok kiri 60 deraat, mentok kanan 120 derajat. jangan melebihi rntang 
 
   nh.spinOnce();
