@@ -78,7 +78,7 @@ if __name__ == "__main__":
         #     [int(cols*0.0), int(rows*0.75)]
         # ])
 
-        # tl, tr, bl, br = utils.get_roi_points()
+        tl, tr, bl, br = utils.get_roi_points()
 
         # src_pts = np.float32([
         #     [175, 251],
