@@ -9,23 +9,17 @@ def get_white_mask(frame):
     upper_white = np.array([180, 50, 255])
     return cv2.inRange(hsv, lower_white, upper_white)
 
-def perspective_transform(image):
-    h, w = image.shape[:2]
-    src = np.float32([
-        [230, 75],   # top-left
-        [448, 78],   # top-right
-        [640, 380],  # bottom-right
-        [0, 430],    # bottom-left
+def get_white_mask_gray(frame, threshold=150):
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    _, mask = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
+    return mask
 
-    ])
-    dst = np.float32([
-        [w * 0.3, 0],
-        [w * 0.7, 0],
-        [w * 0.7, h],
-        [w * 0.3, h],
-    ])
-    M = cv2.getPerspectiveTransform(src, dst)
-    return cv2.warpPerspective(image, M, (w, h))
+def perspective_transform(image):
+    tl, bl, tr, br = (230, 75), (0, 430), (448, 78), (640, 380)
+    pts1 = np.float32([tl, bl, tr, br])
+    pts2 = np.float32([[0, 0], [0, 480], [640, 0], [640, 480]])
+    matrix = cv2.getPerspectiveTransform(pts1, pts2)
+    return cv2.warpPerspective(image, matrix, (640, 480))
 
 def get_lane_position(mask):
     h, w = mask.shape
@@ -64,8 +58,10 @@ if __name__ == "__main__":
                 continue
 
             color_image = np.asanyarray(color_frame.get_data())
-            white_mask = get_white_mask(color_image)
+            white_mask = get_white_mask_gray(color_image)
             bird_eye = perspective_transform(white_mask)
+            bird_eye2 = perspective_transform(color_image)
+
             color_vis = cv2.cvtColor(bird_eye, cv2.COLOR_GRAY2BGR)
 
             left_x, right_x, lane_center, frame_center, error = get_lane_position(bird_eye)
@@ -83,9 +79,10 @@ if __name__ == "__main__":
 
             print(f"Steering Angle: {angle:.2f} degrees")
 
+            cv2.imshow("Warped", bird_eye2)
             cv2.imshow("Lane View", color_vis)
-            if cv2.waitKey(1) == 27:
-                break
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break                
 
     finally:
         pipeline.stop()
