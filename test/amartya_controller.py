@@ -2,6 +2,27 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import math
+import rospy
+from geometry_msgs.msg import Twist
+
+def publish():
+    rospy.init_node('cmd_vel_publisher', anonymous=True)     # Initialize the node
+    pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)    # Create a publisher object
+    rate = rospy.Rate(10)  # 10 Hz
+
+    twist = Twist()
+    twist.linear.x = 0   # Forward with 0.5 m/s
+    twist.linear.y = 0.0
+    twist.linear.z = 0.0
+    twist.angular.x = 0.0
+    twist.angular.y = 0.0
+    twist.angular.z = angle  # Rotate with 0.5 rad/s
+
+    # Publish in a loop
+    while not rospy.is_shutdown():
+        pub.publish(twist)
+        rospy.loginfo(f"Publishing cmd_vel: linear.x={twist.linear.x}, angular.z={twist.angular.z}")
+        rate.sleep()
 
 # === Mapping angle to servo pulse ===
 def map_angle_to_servo(angle, angle_range=(-45, 45), servo_range=(60, 120)):
@@ -147,6 +168,8 @@ try:
         cv2.imshow("Warped View", bird_eye_color)
         cv2.imshow("Combined Obstacle Mask", combined_mask)
         cv2.imshow("Original", color_image)
+
+        publish()
 
         if cv2.waitKey(1) & 0xFF == 27:
             break
