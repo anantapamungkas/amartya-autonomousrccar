@@ -62,7 +62,7 @@ if __name__ == "__main__":
             color_image = cv2.GaussianBlur(filtered, (3, 3), 0)
 
             # Mask and transform
-            black_mask = get_black_mask_gray(color_image)
+            black_mask = get_black_mask_gray(color_image, 90)
             bird_eye_mask = perspective_transform(black_mask)
             bird_eye_color = perspective_transform(color_image)
 
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
             # Display
             cv2.imshow("Warped View", bird_eye_color)
-            cv2.imshow("Black Mask", bird_eye_color)
+            cv2.imshow("Black Mask", black_mask)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
